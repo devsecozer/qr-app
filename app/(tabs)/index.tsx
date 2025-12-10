@@ -1,24 +1,36 @@
-// app/tabs/index.tsx
-import { useRouter } from "expo-router";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Link } from "expo-router";
 
-export default function Scan() {
-  const router = useRouter();
-
+export default function Home() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>QR Scanner</Text>
-      <Text style={styles.subtitle}>Kamera izinlerini ekleyip burada tarama yapacağız.</Text>
+      <Text style={styles.title}>QR App</Text>
 
-      <View style={{ marginTop: 20, width: "80%" }}>
-        <Button title="Generate ekranına git" onPress={() => router.push("/(tabs)/generate")} />
-      </View>
+      <Link href="/(tabs)/scanner" asChild>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>📷 QR Kod Tara</Text>
+        </TouchableOpacity>
+      </Link>
+
+      <Link href="/(tabs)/generate" asChild>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>✨ QR Kod Oluştur</Text>
+        </TouchableOpacity>
+      </Link>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex:1, alignItems:'center', justifyContent:'center', padding:20 },
-  title: { fontSize:22, fontWeight:'700' },
-  subtitle: { marginTop:8, color:'#666' }
+  container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20 },
+  title: { fontSize: 28, fontWeight: "bold", marginBottom: 30 },
+  button: {
+    width: "100%",
+    backgroundColor: "#0037fdff",
+    padding: 16,
+    borderRadius: 10,
+    marginBottom: 15,
+    alignItems: "center",
+  },
+  buttonText: { color: "white", fontSize: 18, fontWeight: "bold" },
 });

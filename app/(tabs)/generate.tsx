@@ -1,6 +1,6 @@
 // app/tabs/generate.tsx
+import { View, Text, StyleSheet, TextInput, Button } from "react-native";
 import React, { useState } from "react";
-import { Button, StyleSheet, Text, TextInput, View } from "react-native";
 import QRCode from "react-native-qrcode-svg"; // npm install react-native-qrcode-svg
 
 export default function Generate() {
