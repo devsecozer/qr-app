@@ -1,29 +1,28 @@
-import { Link } from 'expo-router';
-import { StyleSheet } from 'react-native';
-
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+// app/modal.tsx
+import { useRouter } from "expo-router";
+import { Button, StyleSheet, Text, View } from "react-native";
 
 export default function ModalScreen() {
+  const router = useRouter();
+
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title">This is a modal</ThemedText>
-      <Link href="/" dismissTo style={styles.link}>
-        <ThemedText type="link">Go to home screen</ThemedText>
-      </Link>
-    </ThemedView>
+    <View style={styles.container}>
+      <Text style={styles.title}>Bu bir modal ekranıdır</Text>
+
+      <Button title="Kapat" onPress={() => router.back()} />
+
+      <View style={{ height: 10 }} />
+
+      <Button title="Tab'lara dön" onPress={() => router.push("/(tabs)/generate")} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
+    flex:1, alignItems:'center', justifyContent:'center', padding:20
   },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
+  title: {
+    fontSize:18, fontWeight:'700'
+  }
 });
