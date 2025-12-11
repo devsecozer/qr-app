@@ -48,7 +48,7 @@ export default function Scanner() {
   style={{ flex: 1 }}
   facing="back"
   enableTorch={torchOn}
-  zoom={0.1}
+  zoom={0.2}
   barcodeScannerSettings={{
     barcodeTypes: ["qr", "ean13", "ean8", "code39", "code128"],
   }}
