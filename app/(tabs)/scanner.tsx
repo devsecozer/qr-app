@@ -1,8 +1,7 @@
-// app/(tabs)/scanner.tsx
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { CameraView, useCameraPermissions, PermissionStatus } from 'expo-camera';
 import { MaterialIcons } from '@expo/vector-icons';
+import { CameraView, PermissionStatus, useCameraPermissions } from 'expo-camera';
+import React, { useEffect, useState } from 'react';
+import { Alert, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function Scanner() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -32,34 +31,38 @@ export default function Scanner() {
 
   const handleBarCodeScanned = ({ data }: { data: string }) => {
     if (scanned) return;
+
     setScanned(true);
 
-    Alert.alert('Scanned QR Code', data, [
-      { text: 'OK', onPress: () => setScanned(false) }
-    ]);
+    // open browser scanner
+    Linking.openURL(data).catch(() => {
+      Alert.alert("Invalid QR Code", data, [
+        { text: "OK", onPress: () => setScanned(false) }
+      ]);
+    });
   };
 
   return (
     <View style={{ flex: 1 }}>
-      <CameraView
-        style={{ flex: 1 }}
-        facing="back"
-        enableTorch={torchOn}
-        barcodeScannerSettings={{
-          barcodeTypes: ['qr', 'ean13', 'ean8', 'code39', 'code128'],
-        }}
-        onBarcodeScanned={handleBarCodeScanned}
-      />
+<CameraView
+  style={{ flex: 1 }}
+  facing="back"
+  enableTorch={torchOn}
+  zoom={0.1}
+  barcodeScannerSettings={{
+    barcodeTypes: ["qr", "ean13", "ean8", "code39", "code128"],
+  }}
+  onBarcodeScanned={handleBarCodeScanned}
+/>
 
-      {/* Üst yazı */}
+
       <View style={styles.overlay}>
         <Text style={styles.overlayText}>Scan QR Code</Text>
       </View>
 
-      {/* Flashlight button */}
       <View style={styles.flashContainer}>
-        <TouchableOpacity
-          style={styles.flashButton}
+        <TouchableOpacity 
+          style={styles.flashButton} 
           onPress={() => setTorchOn(prev => !prev)}
         >
           <MaterialIcons
@@ -103,7 +106,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   flashButton: {
-    backgroundColor: 'rgba(0, 0, 0, 0)',
     padding: 14,
     borderRadius: 50,
   },
