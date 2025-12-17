@@ -1,9 +1,10 @@
 // app/tabs/generate.tsx
-import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
+import * as Sharing from "expo-sharing";
 import React, { useRef, useState } from "react";
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
+import ViewShot from "react-native-view-shot";
 
 export default function Generate() {
   const [value, setValue] = useState("");
@@ -11,12 +12,13 @@ export default function Generate() {
   const [bgColor, setBgColor] = useState("#ffffff");
   const [showQR, setShowQR] = useState(false);
   const [logo, setLogo] = useState<string | null>(null);
-  const qrRef = useRef<any>(null);
+
+  const viewShotRef = useRef<ViewShot>(null);
 
   const colorOptions = ["#0037fd", "#000000", "#00c853", "#ff1744"];
   const bgOptions = ["#ffffff", "#f5f5f5", "#ffe0b2", "#c8e6c9"];
 
-  // Logo seçme
+  // Logo seç
   const pickLogo = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -29,26 +31,28 @@ export default function Generate() {
     }
   };
 
-  // QR'ı kaydetme
-  const saveQR = () => {
-    if (!qrRef.current) return;
+  // QR Share (KESİN ÇALIŞIR)
+  const shareQR = async () => {
+    try {
+      if (!viewShotRef.current) return;
 
-    qrRef.current.toDataURL(async (data: string) => {
-      try {
-        const path = (FileSystem as any).cacheDirectory + "qr.png"; // TS bypass
-        await FileSystem.writeAsStringAsync(path, data, { encoding: "base64" });
-        Alert.alert("Saved!", `QR code saved to: ${path}`);
-      } catch (err: any) {
-        Alert.alert("Error", "Failed to save QR code: " + err.message);
+const uri = await viewShotRef.current!.capture!();
+
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert("Error", "Sharing is not available on this device");
+        return;
       }
-    });
+
+      await Sharing.shareAsync(uri);
+    } catch (e) {
+      Alert.alert("Error", "QR paylaşılırken hata oluştu");
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Generate QR Code</Text>
 
-      {/* Text input */}
       <TextInput
         style={styles.input}
         placeholder="Enter text here"
@@ -59,46 +63,53 @@ export default function Generate() {
         }}
       />
 
-      {/* QR Color Picker */}
       <Text style={styles.sectionTitle}>QR Color</Text>
       <View style={styles.colorRow}>
         {colorOptions.map((color) => (
           <TouchableOpacity
             key={color}
-            style={[styles.colorDot, { backgroundColor: color }, qrColor === color && styles.activeDot]}
+            style={[
+              styles.colorDot,
+              { backgroundColor: color },
+              qrColor === color && styles.activeDot,
+            ]}
             onPress={() => setQrColor(color)}
           />
         ))}
       </View>
 
-      {/* Background Color Picker */}
       <Text style={styles.sectionTitle}>Background Color</Text>
       <View style={styles.colorRow}>
         {bgOptions.map((color) => (
           <TouchableOpacity
             key={color}
-            style={[styles.colorDot, { backgroundColor: color }, bgColor === color && styles.activeDot]}
+            style={[
+              styles.colorDot,
+              { backgroundColor: color },
+              bgColor === color && styles.activeDot,
+            ]}
             onPress={() => setBgColor(color)}
           />
         ))}
       </View>
 
-      {/* Logo Picker */}
-      <TouchableOpacity style={styles.logoButton} onPress={pickLogo}>
-        <Text style={styles.logoButtonText}>{logo ? "Change Logo" : "Pick Logo from Gallery"}</Text>
+      <TouchableOpacity style={styles.blackButton} onPress={pickLogo}>
+        <Text style={styles.blackButtonText}>
+          {logo ? "Change Logo" : "Pick Logo from Gallery"}
+        </Text>
       </TouchableOpacity>
 
-      {/* Generate Button */}
-      <TouchableOpacity style={styles.generateButton} onPress={() => setShowQR(true)}>
-        <Text style={styles.generateButtonText}>Generate QR</Text>
+      <TouchableOpacity style={styles.blackButton} onPress={() => setShowQR(true)}>
+        <Text style={styles.blackButtonText}>Generate QR</Text>
       </TouchableOpacity>
 
-      {/* QR Code */}
-      <View style={styles.qrBox}>
-        {showQR && value && (
-          <>
+      {showQR && value && (
+        <View style={styles.qrBox}>
+          <ViewShot
+            ref={viewShotRef}
+            options={{ format: "png", quality: 1 }}
+          >
             <QRCode
-              ref={qrRef}
               value={value}
               size={180}
               color={qrColor}
@@ -106,12 +117,13 @@ export default function Generate() {
               logo={logo ? { uri: logo } : undefined}
               logoSize={40}
             />
-            <TouchableOpacity style={styles.saveButton} onPress={saveQR}>
-              <Text style={styles.saveButtonText}>Save QR</Text>
-            </TouchableOpacity>
-          </>
-        )}
-      </View>
+          </ViewShot>
+
+          <TouchableOpacity style={styles.blackButton} onPress={shareQR}>
+            <Text style={styles.blackButtonText}>Share QR</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <Text style={styles.footer}>Developed by Özer</Text>
     </View>
@@ -119,19 +131,57 @@ export default function Generate() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: "center", justifyContent: "flex-start", padding: 20, paddingTop: 60 },
+  container: {
+    flex: 1,
+    alignItems: "center",
+    padding: 20,
+    paddingTop: 60,
+  },
   title: { fontSize: 22, fontWeight: "700" },
-  input: { width: "90%", borderColor: "#ccc", borderWidth: 1, borderRadius: 8, padding: 12, marginTop: 12 },
+  input: {
+    width: "90%",
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 12,
+  },
   sectionTitle: { marginTop: 20, fontSize: 16, fontWeight: "600" },
   colorRow: { flexDirection: "row", marginTop: 10 },
-  colorDot: { width: 32, height: 32, borderRadius: 16, marginHorizontal: 6 },
+  colorDot: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginHorizontal: 6,
+  },
   activeDot: { borderWidth: 2, borderColor: "#000" },
-  logoButton: { marginTop: 16, backgroundColor: "#ff8c00", paddingVertical: 12, paddingHorizontal: 20, borderRadius: 10 },
-  logoButtonText: { color: "#fff", fontWeight: "bold" },
-  generateButton: { marginTop: 16, backgroundColor: "#0037fd", paddingVertical: 14, paddingHorizontal: 40, borderRadius: 14 },
-  generateButtonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-  qrBox: { marginTop: 20, padding: 16, backgroundColor: "#fff", borderRadius: 20, elevation: 4, alignItems: "center" },
-  saveButton: { marginTop: 12, backgroundColor: "#00c853", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 12 },
-  saveButtonText: { color: "#fff", fontWeight: "bold" },
-  footer: { position: "absolute", bottom: 20, color: "#888", fontSize: 14 },
+  blackButton: {
+    marginTop: 16,
+    backgroundColor: "#f2f2f2f2",
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: "#000",
+  },
+  blackButtonText: {
+    color: "#000",
+    fontWeight: "bold",
+    fontSize: 15,
+    textAlign: "center",
+  },
+  qrBox: {
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    elevation: 4,
+    alignItems: "center",
+  },
+  footer: {
+    position: "absolute",
+    bottom: 20,
+    color: "#888",
+    fontSize: 14,
+  },
 });
