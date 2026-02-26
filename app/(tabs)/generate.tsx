@@ -12,13 +12,12 @@ export default function Generate() {
   const [bgColor, setBgColor] = useState("#ffffff");
   const [showQR, setShowQR] = useState(false);
   const [logo, setLogo] = useState<string | null>(null);
-
   const viewShotRef = useRef<ViewShot>(null);
 
   const colorOptions = ["#0037fd", "#000000", "#00c853", "#ff1744"];
   const bgOptions = ["#ffffff", "#f5f5f5", "#ffe0b2", "#c8e6c9"];
 
-  // Logo seç
+  // Pick logo
   const pickLogo = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -31,7 +30,7 @@ export default function Generate() {
     }
   };
 
-  // QR Share (KESİN ÇALIŞIR)
+  // QR Share 
   const shareQR = async () => {
     try {
       if (!viewShotRef.current) return;
@@ -45,7 +44,7 @@ const uri = await viewShotRef.current!.capture!();
 
       await Sharing.shareAsync(uri);
     } catch (e) {
-      Alert.alert("Error", "QR paylaşılırken hata oluştu");
+      Alert.alert("Error");
     }
   };
 

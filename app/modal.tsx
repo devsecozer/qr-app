@@ -7,13 +7,13 @@ export default function ModalScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Bu bir modal ekranıdır</Text>
+      <Text style={styles.title}></Text>
 
-      <Button title="Kapat" onPress={() => router.back()} />
+      <Button title="Close" onPress={() => router.back()} />
 
       <View style={{ height: 10 }} />
 
-      <Button title="Tab'lara dön" onPress={() => router.push("/(tabs)/generate")} />
+      <Button title="return tabs" onPress={() => router.push("/(tabs)/generate")} />
     </View>
   );
 }
